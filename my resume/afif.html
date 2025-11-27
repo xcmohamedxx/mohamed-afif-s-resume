@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AFIF — Interactive Dev Showcase</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --accent:#6ee7b7; --muted:#94a3b8; --glass:rgba(255,255,255,0.03);
+    --glass-2:rgba(255,255,255,0.02);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:linear-gradient(180deg,#071028 0%, #071826 60%);}
+  canvas#bg{position:fixed;inset:0;z-index:0}
+  .app{position:relative;z-index:5;max-width:1200px;margin:28px auto;padding:28px;display:grid;gap:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+  h1{margin:0;font-size:1.25rem;letter-spacing:0.2px}
+  .controls{display:flex;gap:8px;align-items:center}
+  button, .btn{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:8px 12px;border-radius:8px;cursor:pointer}
+  .btn.secondary{background:transparent;color:#cfeefd;border:1px solid rgba(255,255,255,0.04)}
+  .hero{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  .intro h2{margin:0 0 8px 0;font-size:2rem}
+  .type{color:var(--accent);display:inline-block}
+  .muted{color:var(--muted);font-size:0.95rem}
+  .ctas{margin-top:12px;display:flex;gap:8px;align-items:center}
+  .projects{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{padding:12px;border-radius:10px;background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+  .card h3{margin:0 0 8px 0;font-size:1rem}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tag{background:var(--glass-2);padding:6px 8px;border-radius:8px;font-size:0.8rem;color:var(--muted)}
+  footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:0.9rem}
+  /* modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(1,6,16,0.6);display:none;align-items:center;justify-content:center;z-index:40}
+  .modal{width:min(1100px,96vw);max-height:86vh;overflow:auto;background:#041022;padding:18px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+  pre{background:#02111a;color:#cfeefd;padding:12px;border-radius:8px;overflow:auto}
+  /* terminal */
+  .terminal{background:#010913;padding:14px;border-radius:10px;color:#8be9b7;font-family:monospace;font-size:13px;min-height:160px;overflow:auto}
+  .row{display:flex;gap:8px;align-items:center}
+  /* responsive */
+  @media (max-width:980px){.hero{grid-template-columns:1fr;}.projects{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:620px){.projects{grid-template-columns:1fr}.brand h1{display:none}}
+  /* small flourish */
+  .spark{width:10px;height:10px;border-radius:50%;background:linear-gradient(45deg,var(--accent),#60a5fa);box-shadow:0 6px 18px rgba(96,165,250,0.16)}
+  .metric{display:flex;flex-direction:column;align-items:flex-start}
+  .metric strong{font-size:1.1rem;color:var(--accent)}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">AF</div>
+      <div>
+        <h1>Afif — Interactive Dev Showcase</h1>
+        <div class="muted">Freelance developer — Python · HTML · C++ — I build reliable, performant systems and polished web experiences. Available for paid freelance work.</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="copyEmail" class="btn">Copy Email</button>
+      <button id="downloadResume" class="btn secondary">Download Résumé</button>
+      <button id="openTerminal" class="btn">Open Terminal</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="panel intro">
+      <h2>Hi — I'm Afif. I build elegant, fast interfaces for the web.</h2>
+      <div class="muted">I code in <span class="type" id="typed">Python</span>, HTML & C++. I deliver production-ready services: web apps, automation, scraping, and high-performance libraries.</div>
+
+      <div class="ctas">
+        <button id="viewProjects" class="btn">View Projects</button>
+        <button id="viewDemo" class="btn secondary">Live Demo</button>
+        <div style="margin-left:auto" class="metric">
+          <span class="muted">Uptime</span><strong id="uptime">--</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:16px" class="spark"></div>
+      <div style="margin-top:12px" class="muted">This page demonstrates: canvas animation, typewriter, modal code preview, simulated terminal, downloadable résumé and responsive layout — all without external libraries.</div>
+    </div>
+
+    <aside>
+      <div class="panel">
+        <h3>Quick Terminal</h3>
+        <div id="terminal" class="terminal" aria-live="polite"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="cmdInput" placeholder="type command (e.g. about, demo, help)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#cfeefd" />
+          <button id="runCmd" class="btn">Run</button>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- Services: new professional section -->
+  <section style="margin-top:18px" id="servicesSection">
+    <h2 style="margin:0 0 8px 0">Services I Offer</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div class="card">
+        <h3>Web Applications</h3>
+        <div class="muted">Full-stack web apps using solid front-end and Python back-ends. Production deploys and monitoring.</div>
+        <div class="tags" style="margin-top:10px"><div class="tag">HTML/CSS</div><div class="tag">Python</div><div class="tag">APIs</div></div>
+      </div>
+      <div class="card">
+        <h3>Automation & Scraping</h3>
+        <div class="muted">Reliable scrapers, ETL pipelines and automation scripts to collect and process data.</div>
+        <div class="tags" style="margin-top:10px"><div class="tag">Python</div><div class="tag">Scrapy</div><div class="tag">Pipelines</div></div>
+      </div>
+      <div class="card">
+        <h3>Performance C++ Modules</h3>
+        <div class="muted">Native modules and libraries for CPU-bound tasks, integrations, and real-time processing.</div>
+        <div class="tags" style="margin-top:10px"><div class="tag">C++</div><div class="tag">Optimization</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolioSection" style="margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="flex:1">
+        <h2 style="margin:0 0 8px 0">Portfolio & Testimonials</h2>
+        <p class="muted">Selected case studies and real client testimonials will be shown here. For now, please contact me for tailored examples or to request a demo tailored to your project.</p>
+        <div style="display:grid;gap:8px;margin-top:12px">
+          <div class="card">
+            <strong>Client Name • Data pipeline</strong>
+            <div class="muted">"Delivered robust scraping and ETL pipeline within schedule. High quality and clear communication."</div>
+          </div>
+          <div class="card">
+            <strong>Client Name • Front-end</strong>
+            <div class="muted">"Polished landing page, accessible and performant. Recommended for production work."</div>
+          </div>
+        </div>
+      </div>
+      <div style="width:320px">
+        <div class="card">
+          <h3>Hire me</h3>
+          <div class="muted">I take on short & long term contracts. Typical deliverables: scoped proposal, prototype, final delivery, optional maintenance.</div>
+          <div style="margin-top:10px"><button id="contactMe" class="btn">Contact — simohamedafif123@gmail.com</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Notes: visible panel with concise, actionable guidance for you -->
+  <section id="devNotesWrap" style="margin-top:16px">
+    <div class="card" id="devNotes" style="white-space:pre-wrap;font-family:monospace;line-height:1.45;display:none">
+      /* Developer Notes - quick reference */
+      - api(path, opts): simple fetch wrapper. Use for all server calls; returns parsed JSON or throws {status,body}.
+      - Background (canvas): particle system in step(); adapt PT_COUNT for performance. Keep math separated; add spatial partitioning for many points.
+      - Typewriter (tw): cycles words; change 'words' array for tech you want shown.
+      - Terminal (handleCmd): scripted commands for quick actions (about, skills, services, contact, invoice, devnotes, uptime, clear).
+      - Utilities: copyEmail/downloadResume generate client-side artifacts. invoice generates a txt blob client-side.
+      - To add real projects:
+         1) Remove this placeholder section.
+         2) Add an entry in a PROJECTS array (id,title,tags,desc,code,demoURL).
+         3) Create a secure server endpoint or static demo iframe and update 'Open Demo' handler to open an iframe modal.
+      - Security note: this demo stores nothing sensitive in browser storage. For real auth, use server-side sessions and TLS.
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button id="toggleDevNotes" class="btn secondary">Toggle Developer Notes</button>
+      <button id="downloadGuide" class="btn">Download Quick Guide</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="muted">Built with modern Web APIs • No libraries</div>
+    <div class="muted">Open-source & portable</div>
+  </footer>
+</div>
+
+<script>
+/* ============ Background particles ============ */
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth, H = canvas.height = innerHeight;
+const pts = [];
+const PT_COUNT = Math.round((W*H)/45000);
+for(let i=0;i<PT_COUNT;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.6,vy:(Math.random()-0.5)*0.6,r:1+Math.random()*2});
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+addEventListener('resize', resize);
+
+let mouse = {x:W/2,y:H/2,active:false};
+addEventListener('mousemove', e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+addEventListener('mousedown', ()=>mouse.active=true);
+addEventListener('mouseup', ()=>mouse.active=false);
+
+function step(){
+  ctx.clearRect(0,0,W,H);
+  for(let p of pts){
+    p.x += p.vx; p.y += p.vy;
+    if(p.x<0||p.x>W) p.vx*=-1;
+    if(p.y<0||p.y>H) p.vy*=-1;
+    // mouse repulse
+    const dx = p.x-mouse.x, dy = p.y-mouse.y;
+    const d = Math.sqrt(dx*dx+dy*dy);
+    if(mouse.active && d<120){ p.vx += dx/d*0.12; p.vy += dy/d*0.12; }
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(110,231,183,${0.6 - Math.min(0.5, d/500)})`;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  }
+  // connect nearby
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const a=pts[i], b=pts[j], dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+      if(d2<10000){
+        ctx.strokeStyle = 'rgba(96,165,250,'+ (0.12 - d2/10000*0.08) +')';
+        ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(step);
+}
+step();
+
+/* ============ Typewriter ============ */
+const words = ['JavaScript','TypeScript','Web APIs','CSS Houdini','Performance'];
+let idx=0, ci=0;
+const typed = document.getElementById('typed');
+(function tw(){
+  typed.textContent = words[idx].slice(0,ci++);
+  if(ci>words[idx].length){ setTimeout(()=>{ci=0; idx=(idx+1)%words.length;},1200); }
+  setTimeout(tw, 90);
+})();
+
+/* ============ Terminal simulation ============ */
+const terminal = document.getElementById('terminal');
+const cmdInput = document.getElementById('cmdInput');
+const runCmd = document.getElementById('runCmd');
+
+function appendLine(txt, cls){
+  const el = document.createElement('div');
+  el.textContent = txt; if(cls) el.className = cls;
+  terminal.appendChild(el); terminal.scrollTop = terminal.scrollHeight;
+}
+function simulate(lines, delay=600){
+  terminal.innerHTML='';
+  let i=0;
+  function next(){ if(i<lines.length){ appendLine(lines[i++]); setTimeout(next, delay); } }
+  next();
+}
+document.getElementById('openTerminal').addEventListener('click', ()=>{ simulate(['$ git clone https://github.com/afif/awesome-demo','Cloning into \'awesome-demo\'...','$ cd awesome-demo','$ npm install','installed 42 packages in 0.9s','$ npm run start','Server started at http://localhost:3000']); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}) });
+runCmd.addEventListener('click', () => handleCmd(cmdInput.value || 'help'));
+cmdInput.addEventListener('keyup', (e)=>{ if(e.key==='Enter') handleCmd(cmdInput.value); });
+
+function handleCmd(text){
+  const cmd = (text||'').trim().toLowerCase();
+  if(!cmd) return;
+  appendLine(`$ ${cmd}`);
+  if(cmd === 'help'){
+    appendLine('Available commands: about, skills, services, contact, invoice, demo, devnotes, uptime, clear');
+  } else if(cmd === 'about'){
+    appendLine('Afif — freelance developer: Python, HTML, C++. I deliver production-ready systems and polished front-ends.');
+  } else if(cmd === 'skills'){
+    appendLine('Skills: Python (scraping, ETL, web), HTML/CSS/JS (responsive UI), C++ (performance), APIs, DevOps basics');
+  } else if(cmd === 'services'){
+    appendLine('Services: Web apps, Automation/Scrapers, C++ modules, API integrations, Consulting');
+  } else if(cmd === 'contact'){
+    appendLine('Contact: simohamedafif123@gmail.com — I respond to freelance inquiries within 24 hours.');
+  } else if(cmd === 'invoice'){
+    // generate simple invoice text and offer download link
+    const id = 'INV-' + (Math.random()*9000|1000);
+    const txt = `Invoice ${id}\nTo: Client\nAmount: $___\nServices: ____\nContact: simohamedafif123@gmail.com\nThank you.`;
+    const blob = new Blob([txt],{type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    appendLine(`Generated invoice: ${id} — download link below`);
+    const a = document.createElement('a'); a.href = url; a.textContent = `Download ${id}.txt`; a.style.color='#6ee7b7'; a.style.display='block'; a.style.marginTop='6px';
+    terminal.appendChild(a);
+  } else if(cmd === 'demo'){
+    appendLine('Open a project demo by requesting a demo or providing a target repo/URL. Demos are deployable on request.');
+  } else if(cmd === 'devnotes'){
+    // toggle the visible developer notes panel
+    const dn = document.getElementById('devNotes');
+    dn.style.display = dn.style.display === 'none' ? 'block' : 'none';
+    appendLine('Toggled Developer Notes panel in the page.');
+  } else if(cmd === 'uptime'){
+    appendLine(`Uptime: ${((performance.now()/1000)|0)}s`);
+  } else if(cmd === 'clear'){
+    terminal.innerHTML='';
+  } else appendLine('Command not found. Type help.');
+  cmdInput.value=''; terminal.scrollTop = terminal.scrollHeight;
+}
+
+/* ============ Utilities ============ */
+document.getElementById('copyEmail').addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText('simohamedafif123@gmail.com'); alert('Email copied: simohamedafif123@gmail.com'); }catch(e){ alert('Copy not supported'); }
+});
+
+/* Download quick guide (developer notes) */
+document.getElementById('downloadGuide').addEventListener('click', ()=>{
+  const guide = `Developer Quick Guide\n\n- api(path, opts): single place for fetch calls\n- Background: modify PT_COUNT for performance\n- To add a project: follow comments in Developer Notes panel\n- Security: move auth server-side\n\nContact: simohamedafif123@gmail.com`;
+  const blob = new Blob([guide],{type:'text/plain'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='Dev-Quick-Guide.txt'; a.click(); URL.revokeObjectURL(url);
+});
+
+/* contact button wiring */
+document.getElementById('contactMe').addEventListener('click', ()=>{ navigator.clipboard?.writeText('simohamedafif123@gmail.com'); alert('Email copied: simohamedafif123@gmail.com'); });
+
+/* remove mutation observer and modal-related handlers (not needed without projects) */
+/* ...existing remaining code (uptime, viewProjects/viewDemo bindings removed or adapted) ... */
+
+</script>
+</body>
+</html>
