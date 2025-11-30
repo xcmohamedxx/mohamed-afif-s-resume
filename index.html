@@ -34,7 +34,13 @@
   footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:0.9rem}
   /* modal */
   .modal-backdrop{position:fixed;inset:0;background:rgba(1,6,16,0.6);display:none;align-items:center;justify-content:center;z-index:40}
-  .modal{width:min(1100px,96vw);max-height:86vh;overflow:auto;background:#041022;padding:18px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+  .modal{width:min(1100px,96vw);max-height:86vh;overflow:auto;background:#041022;padding:18px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);position:relative}
+  .modal-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .modal-project{padding:16px;border-radius:10px;background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:all 0.3s ease}
+  .modal-project:hover{background:linear-gradient(180deg,rgba(110,231,183,0.1), rgba(255,255,255,0.02));border-color:var(--accent)}
+  .modal-project h4{margin:0 0 6px 0;color:var(--accent)}
+  .modal-close{position:absolute;top:12px;right:12px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:#cfeefd;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+  .modal-close:hover{border-color:var(--accent);color:var(--accent)}
   pre{background:#02111a;color:#cfeefd;padding:12px;border-radius:8px;overflow:auto}
   /* terminal */
   .terminal{background:#010913;padding:14px;border-radius:10px;color:#8be9b7;font-family:monospace;font-size:13px;min-height:160px;overflow:auto}
@@ -51,6 +57,15 @@
 <body>
 <canvas id="bg"></canvas>
 
+<!-- Projects Modal -->
+<div class="modal-backdrop" id="projectsModal">
+  <div class="modal">
+    <button class="modal-close" id="closeProjectsModal">×</button>
+    <h2 style="margin:0 0 16px 0">Projects & Work</h2>
+    <div class="modal-content" id="projectsList"></div>
+  </div>
+</div>
+
 <div class="app">
   <header>
     <div class="brand">
@@ -63,7 +78,6 @@
     <div class="controls">
       <button id="copyEmail" class="btn">Copy Email</button>
       <button id="downloadResume" class="btn secondary">Download Résumé</button>
-      <button id="openTerminal" class="btn">Open Terminal</button>
     </div>
   </header>
 
@@ -74,7 +88,6 @@
 
       <div class="ctas">
         <button id="viewProjects" class="btn">View Projects</button>
-        <button id="viewDemo" class="btn secondary">Live Demo</button>
         <div style="margin-left:auto" class="metric">
           <span class="muted">Uptime</span><strong id="uptime">--</strong>
         </div>
@@ -86,35 +99,42 @@
 
     <aside>
       <div class="panel">
-        <h3>Quick Terminal</h3>
-        <div id="terminal" class="terminal" aria-live="polite"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <input id="cmdInput" placeholder="type command (e.g. about, demo, help)" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#cfeefd" />
-          <button id="runCmd" class="btn">Run</button>
+        <h3>Services</h3>
+        <button id="toggleServices" class="btn" style="width:100%;margin-bottom:8px">Expand Services</button>
+        <div id="servicesDropdown" style="display:none">
+          <div style="padding:8px;background:rgba(255,255,255,0.01);border-radius:8px;border:1px solid rgba(255,255,255,0.03)">
+            <div style="margin-bottom:8px">
+              <strong style="color:var(--accent)">Web Applications</strong>
+              <div class="muted" style="font-size:0.85rem;margin-top:4px">Full-stack web apps using solid front-end and Python back-ends. Production deploys and monitoring.</div>
+            </div>
+            <div style="margin-bottom:8px">
+              <strong style="color:var(--accent)">Automation & Scraping</strong>
+              <div class="muted" style="font-size:0.85rem;margin-top:4px">Reliable scrapers, ETL pipelines and automation scripts to collect and process data.</div>
+            </div>
+            <div>
+              <strong style="color:var(--accent)">Performance C++ Modules</strong>
+              <div class="muted" style="font-size:0.85rem;margin-top:4px">Native modules and libraries for CPU-bound tasks, integrations, and real-time processing.</div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
   </section>
 
-  <!-- Services: new professional section -->
-  <section style="margin-top:18px" id="servicesSection">
-    <h2 style="margin:0 0 8px 0">Services I Offer</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
-      <div class="card">
-        <h3>Web Applications</h3>
-        <div class="muted">Full-stack web apps using solid front-end and Python back-ends. Production deploys and monitoring.</div>
-        <div class="tags" style="margin-top:10px"><div class="tag">HTML/CSS</div><div class="tag">Python</div><div class="tag">APIs</div></div>
-      </div>
-      <div class="card">
-        <h3>Automation & Scraping</h3>
-        <div class="muted">Reliable scrapers, ETL pipelines and automation scripts to collect and process data.</div>
-        <div class="tags" style="margin-top:10px"><div class="tag">Python</div><div class="tag">Scrapy</div><div class="tag">Pipelines</div></div>
-      </div>
-      <div class="card">
-        <h3>Performance C++ Modules</h3>
-        <div class="muted">Native modules and libraries for CPU-bound tasks, integrations, and real-time processing.</div>
-        <div class="tags" style="margin-top:10px"><div class="tag">C++</div><div class="tag">Optimization</div></div>
-      </div>
+
+  <!-- About & Info Section -->
+  <section style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+    <div class="card">
+      <h3>About</h3>
+      <div class="muted">Afif — freelance developer: Python, HTML, C++. I deliver production-ready systems and polished front-ends. Available for short & long term contracts.</div>
+    </div>
+    <div class="card">
+      <h3>Skills</h3>
+      <div class="muted">Python (scraping, ETL, web), HTML/CSS/JS (responsive UI), C++ (performance), APIs, DevOps basics</div>
+    </div>
+    <div class="card">
+      <h3>Response Time</h3>
+      <div class="muted">I respond to freelance inquiries within 24 hours. Contact: simohamedafif123@gmail.com</div>
     </div>
   </section>
 
@@ -122,15 +142,10 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
       <div style="flex:1">
         <h2 style="margin:0 0 8px 0">Portfolio & Testimonials</h2>
-        <p class="muted">Selected case studies and real client testimonials will be shown here. For now, please contact me for tailored examples or to request a demo tailored to your project.</p>
         <div style="display:grid;gap:8px;margin-top:12px">
           <div class="card">
-            <strong>Client Name • Data pipeline</strong>
-            <div class="muted">"Delivered robust scraping and ETL pipeline within schedule. High quality and clear communication."</div>
-          </div>
-          <div class="card">
-            <strong>Client Name • Front-end</strong>
-            <div class="muted">"Polished landing page, accessible and performant. Recommended for production work."</div>
+            <strong><a href="https://portolio-test-production.up.railway.app" target="_blank" style="color:var(--accent);text-decoration:none;cursor:pointer">Portfolio Maker →</a></strong>
+            <div class="muted">"This interactive portfolio tool helped me showcase my work professionally. Elegant design, fully customizable, and requires no external libraries. Highly recommended for developers."</div>
           </div>
         </div>
       </div>
@@ -144,28 +159,38 @@
     </div>
   </section>
 
-  <!-- Developer Notes: visible panel with concise, actionable guidance for you -->
-  <section id="devNotesWrap" style="margin-top:16px">
-    <div class="card" id="devNotes" style="white-space:pre-wrap;font-family:monospace;line-height:1.45;display:none">
-      /* Developer Notes - quick reference */
-      - api(path, opts): simple fetch wrapper. Use for all server calls; returns parsed JSON or throws {status,body}.
-      - Background (canvas): particle system in step(); adapt PT_COUNT for performance. Keep math separated; add spatial partitioning for many points.
-      - Typewriter (tw): cycles words; change 'words' array for tech you want shown.
-      - Terminal (handleCmd): scripted commands for quick actions (about, skills, services, contact, invoice, devnotes, uptime, clear).
-      - Utilities: copyEmail/downloadResume generate client-side artifacts. invoice generates a txt blob client-side.
-      - To add real projects:
-         1) Remove this placeholder section.
-         2) Add an entry in a PROJECTS array (id,title,tags,desc,code,demoURL).
-         3) Create a secure server endpoint or static demo iframe and update 'Open Demo' handler to open an iframe modal.
-      - Security note: this demo stores nothing sensitive in browser storage. For real auth, use server-side sessions and TLS.
-    </div>
-    <div style="margin-top:8px;display:flex;gap:8px">
-      <button id="toggleDevNotes" class="btn secondary">Toggle Developer Notes</button>
-      <button id="downloadGuide" class="btn">Download Quick Guide</button>
+  <!-- Additional Info Section -->
+  <section style="margin-top:18px">
+    <h2 style="margin:0 0 8px 0">Services & Deliverables</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+      <div class="card">
+        <strong style="color:var(--accent)">Web Applications</strong>
+        <div class="muted" style="margin-top:6px">Full-stack web apps using solid front-end and Python back-ends. Production deploys and monitoring.</div>
+      </div>
+      <div class="card">
+        <strong style="color:var(--accent)">Automation & Scraping</strong>
+        <div class="muted" style="margin-top:6px">Reliable scrapers, ETL pipelines and automation scripts to collect and process data.</div>
+      </div>
+      <div class="card">
+        <strong style="color:var(--accent)">C++ Modules</strong>
+        <div class="muted" style="margin-top:6px">Native modules and libraries for CPU-bound tasks, integrations, and real-time processing.</div>
+      </div>
+      <div class="card">
+        <strong style="color:var(--accent)">Demo & Prototypes</strong>
+        <div class="muted" style="margin-top:6px">Quick demos or prototypes available on request. Deployable solutions tailored to your project needs.</div>
+      </div>
+      <div class="card">
+        <strong style="color:var(--accent)">Scoped Proposals</strong>
+        <div class="muted" style="margin-top:6px">Clear project scoping, timeline estimates, and transparent communication throughout delivery.</div>
+      </div>
+      <div class="card">
+        <strong style="color:var(--accent)">Optional Maintenance</strong>
+        <div class="muted" style="margin-top:6px">Post-delivery support and updates available. Keep your systems running smoothly.</div>
+      </div>
     </div>
   </section>
 
-  <footer>
+
     <div class="muted">Built with modern Web APIs • No libraries</div>
     <div class="muted">Open-source & portable</div>
   </footer>
@@ -225,81 +250,130 @@ const typed = document.getElementById('typed');
   setTimeout(tw, 90);
 })();
 
-/* ============ Terminal simulation ============ */
-const terminal = document.getElementById('terminal');
-const cmdInput = document.getElementById('cmdInput');
-const runCmd = document.getElementById('runCmd');
-
-function appendLine(txt, cls){
-  const el = document.createElement('div');
-  el.textContent = txt; if(cls) el.className = cls;
-  terminal.appendChild(el); terminal.scrollTop = terminal.scrollHeight;
-}
-function simulate(lines, delay=600){
-  terminal.innerHTML='';
-  let i=0;
-  function next(){ if(i<lines.length){ appendLine(lines[i++]); setTimeout(next, delay); } }
-  next();
-}
-document.getElementById('openTerminal').addEventListener('click', ()=>{ simulate(['$ git clone https://github.com/afif/awesome-demo','Cloning into \'awesome-demo\'...','$ cd awesome-demo','$ npm install','installed 42 packages in 0.9s','$ npm run start','Server started at http://localhost:3000']); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}) });
-runCmd.addEventListener('click', () => handleCmd(cmdInput.value || 'help'));
-cmdInput.addEventListener('keyup', (e)=>{ if(e.key==='Enter') handleCmd(cmdInput.value); });
-
-function handleCmd(text){
-  const cmd = (text||'').trim().toLowerCase();
-  if(!cmd) return;
-  appendLine(`$ ${cmd}`);
-  if(cmd === 'help'){
-    appendLine('Available commands: about, skills, services, contact, invoice, demo, devnotes, uptime, clear');
-  } else if(cmd === 'about'){
-    appendLine('Afif — freelance developer: Python, HTML, C++. I deliver production-ready systems and polished front-ends.');
-  } else if(cmd === 'skills'){
-    appendLine('Skills: Python (scraping, ETL, web), HTML/CSS/JS (responsive UI), C++ (performance), APIs, DevOps basics');
-  } else if(cmd === 'services'){
-    appendLine('Services: Web apps, Automation/Scrapers, C++ modules, API integrations, Consulting');
-  } else if(cmd === 'contact'){
-    appendLine('Contact: simohamedafif123@gmail.com — I respond to freelance inquiries within 24 hours.');
-  } else if(cmd === 'invoice'){
-    // generate simple invoice text and offer download link
-    const id = 'INV-' + (Math.random()*9000|1000);
-    const txt = `Invoice ${id}\nTo: Client\nAmount: $___\nServices: ____\nContact: simohamedafif123@gmail.com\nThank you.`;
-    const blob = new Blob([txt],{type:'text/plain'});
-    const url = URL.createObjectURL(blob);
-    appendLine(`Generated invoice: ${id} — download link below`);
-    const a = document.createElement('a'); a.href = url; a.textContent = `Download ${id}.txt`; a.style.color='#6ee7b7'; a.style.display='block'; a.style.marginTop='6px';
-    terminal.appendChild(a);
-  } else if(cmd === 'demo'){
-    appendLine('Open a project demo by requesting a demo or providing a target repo/URL. Demos are deployable on request.');
-  } else if(cmd === 'devnotes'){
-    // toggle the visible developer notes panel
-    const dn = document.getElementById('devNotes');
-    dn.style.display = dn.style.display === 'none' ? 'block' : 'none';
-    appendLine('Toggled Developer Notes panel in the page.');
-  } else if(cmd === 'uptime'){
-    appendLine(`Uptime: ${((performance.now()/1000)|0)}s`);
-  } else if(cmd === 'clear'){
-    terminal.innerHTML='';
-  } else appendLine('Command not found. Type help.');
-  cmdInput.value=''; terminal.scrollTop = terminal.scrollHeight;
-}
+/* ============ Services Toggle ============ */
+document.getElementById('toggleServices').addEventListener('click', (e)=>{
+  const dropdown = document.getElementById('servicesDropdown');
+  const isOpen = dropdown.style.display !== 'none';
+  dropdown.style.display = isOpen ? 'none' : 'block';
+  e.target.textContent = isOpen ? 'Expand Services' : 'Collapse Services';
+});
 
 /* ============ Utilities ============ */
 document.getElementById('copyEmail').addEventListener('click', async ()=>{
   try{ await navigator.clipboard.writeText('simohamedafif123@gmail.com'); alert('Email copied: simohamedafif123@gmail.com'); }catch(e){ alert('Copy not supported'); }
 });
 
-/* Download quick guide (developer notes) */
-document.getElementById('downloadGuide').addEventListener('click', ()=>{
-  const guide = `Developer Quick Guide\n\n- api(path, opts): single place for fetch calls\n- Background: modify PT_COUNT for performance\n- To add a project: follow comments in Developer Notes panel\n- Security: move auth server-side\n\nContact: simohamedafif123@gmail.com`;
-  const blob = new Blob([guide],{type:'text/plain'}); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='Dev-Quick-Guide.txt'; a.click(); URL.revokeObjectURL(url);
+document.getElementById('downloadResume').addEventListener('click', ()=>{
+  const resume = `AFIF — RESUME
+
+FREELANCE DEVELOPER
+Python • HTML • C++ • JavaScript
+
+Email: simohamedafif123@gmail.com
+Portfolio: https://portolio-test-production.up.railway.app
+
+═══════════════════════════════════════
+
+ABOUT
+Freelance developer specializing in production-ready systems and polished front-ends. Available for short & long term contracts with proven track record of delivering high-quality solutions.
+
+═══════════════════════════════════════
+
+SKILLS
+• Python: Web development, Scraping, ETL pipelines, Automation
+• Frontend: HTML, CSS, JavaScript, Responsive Design, Web APIs
+• Backend: REST APIs, Database integration, DevOps basics
+• Systems: C++ for high-performance modules and optimization
+• Tools: Git, Command line, API design, Performance optimization
+
+═══════════════════════════════════════
+
+SERVICES
+✓ Web Applications
+  Full-stack web apps with solid front-end and Python back-ends.
+  Production deploys and monitoring.
+
+✓ Automation & Scraping
+  Reliable scrapers, ETL pipelines, automation scripts.
+  Data collection and processing at scale.
+
+✓ Performance C++ Modules
+  Native modules and libraries for CPU-bound tasks.
+  Integrations and real-time processing.
+
+═══════════════════════════════════════
+
+PORTFOLIO HIGHLIGHTS
+• Portfolio Maker: Interactive portfolio tool with canvas animation,
+  typewriter effect, and responsive layout. No external libraries.
+  Live at: https://portolio-test-production.up.railway.app
+
+═══════════════════════════════════════
+
+CONTACT & AVAILABILITY
+Email: simohamedafif123@gmail.com
+Response Time: Within 24 hours for freelance inquiries
+
+Available for: Short & long term contracts
+Typical Deliverables: Scoped proposal, prototype, final delivery, optional maintenance
+
+═══════════════════════════════════════`;
+  
+  const blob = new Blob([resume], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Afif-Resume.txt';
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 /* contact button wiring */
 document.getElementById('contactMe').addEventListener('click', ()=>{ navigator.clipboard?.writeText('simohamedafif123@gmail.com'); alert('Email copied: simohamedafif123@gmail.com'); });
 
-/* remove mutation observer and modal-related handlers (not needed without projects) */
-/* ...existing remaining code (uptime, viewProjects/viewDemo bindings removed or adapted) ... */
+/* ============ Projects Modal ============ */
+const projects = [
+  {
+    title: 'Portfolio Maker',
+    description: 'Interactive portfolio tool with canvas animation, typewriter effect, and responsive layout. No external libraries.',
+    tags: ['HTML', 'CSS', 'JavaScript', 'Canvas'],
+    url: 'https://portolio-test-production.up.railway.app',
+    demo: true
+  }
+];
+
+function renderProjects(){
+  const list = document.getElementById('projectsList');
+  list.innerHTML = projects.map((p, i) => `
+    <div class="modal-project" onclick="window.open('${p.url}', '_blank')">
+      <h4>${p.title}${p.demo ? ' ✓' : ''}</h4>
+      <div class="muted" style="font-size:0.9rem;margin-bottom:8px">${p.description}</div>
+      <div class="tags">
+        ${p.tags.map(t => `<div class="tag">${t}</div>`).join('')}
+      </div>
+    </div>
+  `).join('') + `
+    <div style="padding:16px;border-radius:10px;background:linear-gradient(180deg,rgba(110,231,183,0.05), rgba(255,255,255,0.02));border:1px solid rgba(110,231,183,0.2);display:flex;align-items:center;justify-content:center;min-height:140px;text-align:center">
+      <div>
+        <div class="muted" style="font-size:0.95rem;margin-bottom:6px">More to come!</div>
+        <div class="muted" style="font-size:0.85rem">Yours could be next. Contact me for collaboration.</div>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('viewProjects').addEventListener('click', ()=>{
+  document.getElementById('projectsModal').style.display = 'flex';
+  if(!document.getElementById('projectsList').innerHTML) renderProjects();
+});
+
+document.getElementById('closeProjectsModal').addEventListener('click', ()=>{
+  document.getElementById('projectsModal').style.display = 'none';
+});
+
+document.getElementById('projectsModal').addEventListener('click', (e)=>{
+  if(e.target.id === 'projectsModal') document.getElementById('projectsModal').style.display = 'none';
+});
 
 </script>
 </body>
